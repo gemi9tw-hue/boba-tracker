@@ -14,14 +14,14 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js (Added error handling in JS if this fails to load) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google Fonts: Zen Maru Gothic (可愛圓體) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Web App Manifest (Data URI for Single File PWA) -->
+    <!-- Web App Manifest -->
     <link rel="manifest" href='data:application/manifest+json;base64,eyJuYW1lIjoi5b+r5qiC5rC057SA6YyE6KGoIiwic2hvcnRfbmFtZSI6IuW/q+aoguawtCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjRkZGQkYwIiwidGhlbWVfY29sb3IiOiIjRkZGQkYwIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzMwODEvMzA4MTE2Mi5wbmciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ=='>
 
     <script>
@@ -45,8 +45,7 @@
     </script>
     <style>
         body {
-            background-color: #FFFBF0; /* Milk color */
-            /* Prevent pull-to-refresh on mobile to feel more like an app */
+            background-color: #FFFBF0; 
             overscroll-behavior-y: none;
         }
         
@@ -92,7 +91,7 @@
         }
     </style>
 </head>
-<body class="text-gray-700 antialiased min-h-screen flex flex-col items-center p-4 md:p-8 safe-area-padding">
+<body class="text-gray-700 antialiased min-h-screen flex flex-col items-center p-4 md:p-8 safe-area-padding pb-12">
 
     <!-- Header -->
     <header class="text-center mb-8 w-full max-w-5xl pt-4">
@@ -100,7 +99,7 @@
         <p class="text-gray-500">記錄每一滴快樂，統計每一分花費！</p>
     </header>
 
-    <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
 
         <!-- Left Column: Statistics & Input (Takes up 1 col on LG) -->
         <div class="lg:col-span-1 space-y-6">
@@ -164,7 +163,7 @@
                         <input type="text" id="input-item" placeholder="例如：1號 (四季春+珍波椰)" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
                     </div>
                     
-                    <!-- 新增糖度與冰塊選項 -->
+                    <!-- 糖度與冰塊選項 -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">糖度</label>
@@ -182,8 +181,8 @@
                             <label class="block text-xs font-bold text-gray-500 mb-1">冰塊</label>
                             <select id="input-ice" class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none cursor-pointer">
                                 <option value="正常">正常</option>
-                                <option value="少冰">少冰</option>
-                                <option value="微冰"selected>微冰</option>
+                                <option value="少冰" selected>少冰</option>
+                                <option value="微冰">微冰</option>
                                 <option value="去冰">去冰</option>
                                 <option value="常溫">常溫</option>
                                 <option value="溫">溫</option>
@@ -203,21 +202,21 @@
             </div>
         </div>
 
-        <!-- Right Column: Charts & History (Takes up 2 cols on LG) -->
+        <!-- Right Column: Charts & History -->
         <div class="lg:col-span-2 space-y-6">
             
             <!-- Charts Section -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <h2 class="text-lg font-bold text-boba mb-4">📊 數據分析</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Pie Chart: Shop Distribution -->
+                    <!-- Pie Chart -->
                     <div class="flex flex-col items-center">
                         <h3 class="text-sm font-bold text-gray-400 mb-2">店家喜好分佈</h3>
                         <div class="relative w-full aspect-square max-h-48 md:max-h-64">
                             <canvas id="shopChart"></canvas>
                         </div>
                     </div>
-                    <!-- Bar Chart: Spending Trend -->
+                    <!-- Bar Chart -->
                     <div class="flex flex-col items-center">
                         <h3 class="text-sm font-bold text-gray-400 mb-2">花費最高品項 Top 5</h3>
                         <div class="relative w-full h-48 md:h-64">
@@ -256,10 +255,7 @@
                             </tr>
                         </thead>
                         <tbody id="history-list" class="text-sm">
-                            <!-- JS will inject rows here -->
-                            <tr>
-                                <td colspan="5" class="text-center py-8 text-gray-400">目前沒有紀錄，快去買一杯吧！ 🥤</td>
-                            </tr>
+                            <tr><td colspan="5" class="text-center py-8 text-gray-400">載入中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -268,10 +264,348 @@
     </div>
 
     <!-- Footer for Version Checking -->
-    <footer class="mt-8 mb-4 text-center">
-        <p class="text-xs text-tea font-bold opacity-50">Boba Tracker v2.1</p>
+    <footer class="mt-8 mb-4 text-center w-full">
+        <p class="text-xs text-gray-400 font-bold">Boba Tracker v2.3</p>
     </footer>
 
     <!-- Custom Confirmation Modal -->
     <div id="delete-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm p-4">
-        <div class="modal-content bg-white rounded-3xl shadow
+        <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm text-center border-4 border-tea">
+            <div class="text-4xl mb-4">🗑️</div>
+            <h3 class="text-xl font-bold text-boba mb-2">確定要刪除嗎？</h3>
+            <p class="text-gray-500 mb-6 text-sm">這筆紀錄將會消失，無法復原喔！</p>
+            <div class="flex space-x-3 justify-center">
+                <button onclick="closeModal()" class="px-6 py-2 rounded-xl border-2 border-gray-200 font-bold text-gray-500 hover:bg-gray-50 transition-colors">
+                    再想想
+                </button>
+                <button onclick="confirmDelete()" class="px-6 py-2 rounded-xl bg-red-400 text-white font-bold hover:bg-red-500 shadow-lg transition-colors">
+                    刪除它
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Data Management (Safe Load) ---
+        let drinks = [];
+        try {
+            const loaded = JSON.parse(localStorage.getItem('bobaDrinks'));
+            if (Array.isArray(loaded)) {
+                drinks = loaded;
+            } else if (loaded) {
+                // 如果讀到的資料不是陣列 (可能損壞)，重置為空陣列
+                console.warn("Data corruption detected. Resetting to empty array.");
+                drinks = [];
+            }
+        } catch (e) {
+            console.error("LocalStorage error:", e);
+            drinks = [];
+        }
+        
+        let pendingDeleteId = null; 
+        
+        const form = document.getElementById('drink-form');
+        const historyList = document.getElementById('history-list');
+        const dateInput = document.getElementById('input-date');
+        const deleteModal = document.getElementById('delete-modal');
+
+        // Chart instances
+        let shopChartInstance = null;
+        let itemChartInstance = null;
+
+        // Set default date to today (Local Time Fix)
+        function setToday() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            dateInput.value = `${year}-${month}-${day}`;
+        }
+        setToday();
+
+        // Save to LocalStorage
+        function saveData() {
+            try {
+                localStorage.setItem('bobaDrinks', JSON.stringify(drinks));
+                renderApp();
+            } catch (e) {
+                alert("儲存失敗！可能是手機儲存空間已滿，或是在私密瀏覽模式。\n" + e.message);
+            }
+        }
+
+        // Add Drink (Robust Handler)
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); // Stop page reload
+            
+            try {
+                const priceVal = document.getElementById('input-price').value;
+                if (!priceVal || isNaN(parseInt(priceVal))) {
+                    alert("請輸入有效的價格數字！");
+                    return;
+                }
+
+                const newDrink = {
+                    id: Date.now(),
+                    date: document.getElementById('input-date').value,
+                    shop: document.getElementById('input-shop').value.trim(),
+                    item: document.getElementById('input-item').value.trim(),
+                    sugar: document.getElementById('input-sugar').value,
+                    ice: document.getElementById('input-ice').value,
+                    price: parseInt(priceVal),
+                };
+                
+                drinks.unshift(newDrink);
+                saveData();
+                
+                // UX: Restore options
+                const currentSugar = document.getElementById('input-sugar').value; 
+                const currentIce = document.getElementById('input-ice').value;
+                
+                form.reset();
+                setToday();
+                
+                document.getElementById('input-sugar').value = currentSugar;
+                document.getElementById('input-ice').value = currentIce;
+                
+            } catch (err) {
+                alert("發生未預期的錯誤，請截圖給開發者：\n" + err.message);
+                console.error(err);
+            }
+        });
+
+        // --- Modal & Delete Logic ---
+
+        window.openDeleteModal = function(id) {
+            pendingDeleteId = id;
+            deleteModal.classList.remove('hidden');
+        };
+
+        window.closeModal = function() {
+            pendingDeleteId = null;
+            deleteModal.classList.add('hidden');
+        };
+
+        window.confirmDelete = function() {
+            if (pendingDeleteId) {
+                drinks = drinks.filter(d => d.id !== pendingDeleteId);
+                saveData();
+                closeModal();
+            }
+        };
+
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                closeModal();
+            }
+        });
+
+        // Clear All logic
+        window.clearAllData = function() {
+            if(confirm('確定要清空所有資料嗎？此動作無法復原！')) {
+                drinks = [];
+                saveData();
+            }
+        };
+
+        // --- Export / Import Functions ---
+        
+        window.exportData = function() {
+            if (drinks.length === 0) {
+                alert("目前沒有資料可以匯出喔！");
+                return;
+            }
+            const dataStr = JSON.stringify(drinks, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `手搖飲紀錄備份_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        window.importData = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedDrinks = JSON.parse(e.target.result);
+                    if (Array.isArray(importedDrinks)) {
+                        if(confirm(`準備匯入 ${importedDrinks.length} 筆資料。\n這將會覆蓋目前的資料，確定嗎？`)) {
+                            drinks = importedDrinks;
+                            saveData();
+                            alert("資料匯入成功！🎉");
+                        }
+                    } else {
+                        alert("檔案格式錯誤，請確認這是正確的備份檔。");
+                    }
+                } catch (error) {
+                    alert("讀取檔案失敗：" + error);
+                }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        };
+
+        // --- Rendering Logic ---
+
+        function renderApp() {
+            try {
+                renderHistory();
+                renderStats();
+                // Check if Chart is loaded
+                if (typeof Chart !== 'undefined') {
+                    renderCharts();
+                } else {
+                    console.warn("Chart.js failed to load. Skipping charts.");
+                }
+            } catch (e) {
+                console.error("Render Error:", e);
+            }
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            
+            if (drinks.length === 0) {
+                historyList.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">目前沒有紀錄，快去買一杯吧！ 🥤</td></tr>`;
+                return;
+            }
+
+            drinks.forEach(drink => {
+                const details = [drink.sugar, drink.ice].filter(Boolean).join(' / ');
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-milk/50 transition-colors border-b border-gray-50";
+                row.innerHTML = `
+                    <td class="py-3 text-gray-500 whitespace-nowrap">${drink.date}</td>
+                    <td class="py-3 font-medium text-boba">${drink.shop}</td>
+                    <td class="py-3 text-gray-600">
+                        <div>${drink.item}</div>
+                        <div class="text-xs text-gray-400">${details}</div>
+                    </td>
+                    <td class="py-3 font-bold text-gray-700 text-right">$${drink.price}</td>
+                    <td class="py-3 text-center">
+                        <button onclick="openDeleteModal(${drink.id})" class="text-gray-300 hover:text-red-500 transition-colors p-1 text-lg">
+                            🗑️
+                        </button>
+                    </td>
+                `;
+                historyList.appendChild(row);
+            });
+        }
+
+        function renderStats() {
+            const totalCups = drinks.length;
+            const totalSpent = drinks.reduce((acc, curr) => acc + (curr.price || 0), 0);
+            const avgPrice = totalCups > 0 ? Math.round(totalSpent / totalCups) : 0;
+
+            const shopCount = {};
+            drinks.forEach(d => { shopCount[d.shop] = (shopCount[d.shop] || 0) + 1; });
+            const topShop = Object.keys(shopCount).length > 0 
+                ? Object.keys(shopCount).reduce((a, b) => shopCount[a] > shopCount[b] ? a : b)
+                : "無資料";
+
+            const itemCount = {};
+            drinks.forEach(d => { itemCount[d.item] = (itemCount[d.item] || 0) + 1; });
+            const topItem = Object.keys(itemCount).length > 0 
+                ? Object.keys(itemCount).reduce((a, b) => itemCount[a] > itemCount[b] ? a : b)
+                : "無資料";
+
+            document.getElementById('stat-total-cups').textContent = totalCups;
+            document.getElementById('stat-total-spent').textContent = '$' + totalSpent.toLocaleString();
+            document.getElementById('stat-avg-price').textContent = '$' + avgPrice;
+            document.getElementById('stat-top-shop').textContent = topShop;
+            document.getElementById('stat-top-item').textContent = topItem;
+        }
+
+        function renderCharts() {
+            if (drinks.length === 0) {
+                if(shopChartInstance) shopChartInstance.destroy();
+                if(itemChartInstance) itemChartInstance.destroy();
+                return;
+            }
+
+            // 1. Data for Shop Pie Chart
+            const shopCount = {};
+            drinks.forEach(d => { shopCount[d.shop] = (shopCount[d.shop] || 0) + 1; });
+            const sortedShops = Object.entries(shopCount).sort((a,b) => b[1] - a[1]);
+            const shopLabels = sortedShops.map(s => s[0]);
+            const shopData = sortedShops.map(s => s[1]);
+
+            const ctxShop = document.getElementById('shopChart').getContext('2d');
+            
+            if(shopChartInstance) shopChartInstance.destroy();
+
+            shopChartInstance = new Chart(ctxShop, {
+                type: 'doughnut',
+                data: {
+                    labels: shopLabels,
+                    datasets: [{
+                        data: shopData,
+                        backgroundColor: [
+                            '#E6C9A8', '#C8D5B9', '#F4ACB7', '#D7E3FC', '#FFD6A5', '#B9FBC0'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: {family: "'Zen Maru Gothic'"} } }
+                    }
+                }
+            });
+
+            // 2. Data for Top Items (by spending)
+            const itemSpending = {};
+            drinks.forEach(d => { itemSpending[d.item] = (itemSpending[d.item] || 0) + (d.price || 0); });
+            const sortedItems = Object.entries(itemSpending).sort((a,b) => b[1] - a[1]).slice(0, 5); 
+            
+            const itemLabels = sortedItems.map(i => i[0]);
+            const itemData = sortedItems.map(i => i[1]);
+
+            const ctxItem = document.getElementById('itemChart').getContext('2d');
+            
+            if(itemChartInstance) itemChartInstance.destroy();
+
+            itemChartInstance = new Chart(ctxItem, {
+                type: 'bar',
+                data: {
+                    labels: itemLabels,
+                    datasets: [{
+                        label: '累計花費 ($)',
+                        data: itemData,
+                        backgroundColor: '#5C4033',
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', 
+                    scales: {
+                        x: { beginAtZero: true, grid: { display: false } },
+                        y: { grid: { display: false }, ticks: { font: {family: "'Zen Maru Gothic'"} } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Initialize
+        renderApp();
+
+    </script>
+</body>
+</html>
