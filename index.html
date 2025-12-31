@@ -14,7 +14,7 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js (Added error handling in JS if this fails to load) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google Fonts: Zen Maru Gothic (可愛圓體) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,6 +75,23 @@
             background: #E6C9A8; 
             border-radius: 10px;
         }
+        
+        /* --- iOS Input Fixes --- */
+        input[type="date"],
+        input[type="text"],
+        input[type="number"],
+        select {
+            -webkit-appearance: none; /* Remove iOS default style */
+            appearance: none;
+            border-radius: 0.75rem; /* Force consistent rounded corners */
+        }
+        /* Specific fix for date inputs to prevent overflow */
+        input[type="date"] {
+            min-height: 2.75rem;
+            display: block; /* Ensure it behaves like a block */
+            width: 100%;
+        }
+
         /* Modal Animation */
         .modal {
             transition: opacity 0.3s ease-in-out;
@@ -144,30 +161,31 @@
                 </div>
             </div>
 
-            <!-- Input Form -->
-            <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-dashed border-tea">
+            <!-- Input Form (Adjusted Padding for Mobile) -->
+            <div class="bg-white p-4 md:p-6 rounded-3xl shadow-md border-2 border-dashed border-tea">
                 <h2 class="text-lg font-bold text-boba mb-4 flex items-center">
                     <span>✏️ 今天喝什麼</span>
                 </h2>
                 <form id="drink-form" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">日期</label>
-                        <input type="date" id="input-date" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
+                        <!-- Added block, appearance-none, max-w-full -->
+                        <input type="date" id="input-date" required class="block w-full max-w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none m-0">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">店家名稱</label>
-                        <input type="text" id="input-shop" placeholder="例如：五十嵐" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
+                        <input type="text" id="input-shop" placeholder="例如：五十嵐" required class="block w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">飲料品項</label>
-                        <input type="text" id="input-item" placeholder="例如：1號 (四季春+珍波椰)" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
+                        <input type="text" id="input-item" placeholder="例如：1號 (四季春+珍波椰)" required class="block w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none">
                     </div>
                     
                     <!-- 糖度與冰塊選項 -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">糖度</label>
-                            <select id="input-sugar" class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none cursor-pointer">
+                            <select id="input-sugar" class="block w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none cursor-pointer">
                                 <option value="全糖">全糖</option>
                                 <option value="少糖">少糖</option>
                                 <option value="半糖">半糖</option>
@@ -179,7 +197,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">冰塊</label>
-                            <select id="input-ice" class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none cursor-pointer">
+                            <select id="input-ice" class="block w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none cursor-pointer">
                                 <option value="正常">正常</option>
                                 <option value="少冰" selected>少冰</option>
                                 <option value="微冰">微冰</option>
@@ -193,7 +211,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1">價格</label>
-                        <input type="number" id="input-price" placeholder="50" min="0" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
+                        <input type="number" id="input-price" placeholder="50" min="0" required class="block w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none">
                     </div>
                     <button type="submit" class="w-full bg-boba text-white font-bold py-3 rounded-xl shadow-lg hover:bg-opacity-90 active:scale-95 transition-all flex justify-center items-center gap-2">
                         <span>➕ 存檔 </span>
@@ -265,7 +283,7 @@
 
     <!-- Footer for Version Checking -->
     <footer class="mt-8 mb-4 text-center w-full">
-        <p class="text-xs text-gray-400 font-bold">Boba Tracker v2.3</p>
+        <p class="text-xs text-gray-400 font-bold">Boba Tracker v2.4 (iOS Fix)</p>
     </footer>
 
     <!-- Custom Confirmation Modal -->
