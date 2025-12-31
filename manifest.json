@@ -1,0 +1,16 @@
+{
+  "name": "快樂水紀錄表",
+  "short_name": "快樂水",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFBF0",
+  "theme_color": "#5C4033",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3081/3081162.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
