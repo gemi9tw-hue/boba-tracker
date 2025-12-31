@@ -30,7 +30,576 @@
 <body class="p-4">
     <h1 class="text-3xl font-bold text-center mb-4">🥤 快樂水紀錄表</h1>
 
-    <!-- （⚠️ 這裡放你原本的 HTML 內容，JS 幾乎不用動） -->
+    <!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🥤 快樂水紀錄表 </title>
+    
+    <!-- PWA & Mobile Settings (iOS Support) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="快樂水紀錄">
+    <!-- App Icon (Boba Icon) -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3081/3081162.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Zen Maru Gothic (可愛圓體) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Web App Manifest (Data URI for Single File PWA) -->
+    <link rel="manifest" href='data:application/manifest+json;base64,eyJuYW1lIjoi5b+r5qiC5rC057SA6YyE6KGoIiwic2hvcnRfbmFtZSI6IuW/q+aoguawtCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjRkZGQkYwIiwidGhlbWVfY29sb3IiOiIjRkZGQkYwIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzMwODEvMzA4MTE2Mi5wbmciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ=='>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Zen Maru Gothic"', 'sans-serif'],
+                    },
+                    colors: {
+                        milk: '#FFFBF0',
+                        tea: '#E6C9A8',
+                        boba: '#5C4033',
+                        matcha: '#C8D5B9',
+                        berry: '#F4ACB7',
+                        sky: '#D7E3FC'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFBF0; /* Milk color */
+            /* Prevent pull-to-refresh on mobile to feel more like an app */
+            overscroll-behavior-y: none;
+        }
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFFBF0; 
+           width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFFBF0; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E6C9A8; 
+            border-radius: 10px;
+        }
+        /* Modal Animation */
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal.hidden .modal-content {
+            transform: scale(0.95) translateY(10px);
+        }
+    </style>
+</head>
+<body class="text-gray-700 antialiased min-h-screen flex flex-col items-center p-4 md:p-8 safe-area-padding">
+
+    <!-- Header -->
+    <header class="text-center mb-8 w-full max-w-5xl pt-4">
+        <h1 class="text-3xl md:text-4xl font-bold text-boba mb-2">🥤 快樂水紀錄表 </h1>
+        <p class="text-gray-500">記錄每一滴快樂，統計每一分花費！</p>
+    </header>
+
+    <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Left Column: Statistics & Input (Takes up 1 col on LG) -->
+        <div class="lg:col-span-1 space-y-6">
+            
+            <!-- Key Stats Cards -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Total Cups -->
+                <div class="card bg-white p-4 rounded-3xl shadow-sm border border-tea text-center">
+                    <div class="text-2xl mb-1">🧋</div>
+                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">年度杯數</div>
+                    <div class="text-2xl font-bold text-boba" id="stat-total-cups">0</div>
+                </div>
+                <!-- Total Spent -->
+                <div class="card bg-white p-4 rounded-3xl shadow-sm border border-tea text-center">
+                    <div class="text-2xl mb-1">💰</div>
+                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">年度支出</div>
+                    <div class="text-2xl font-bold text-boba" id="stat-total-spent">$0</div>
+                </div>
+                <!-- Top Shop -->
+                <div class="card bg-white p-4 rounded-3xl shadow-sm border border-matcha text-center col-span-2">
+                    <div class="flex items-center justify-center space-x-2">
+                        <span class="text-xl">🏆</span>
+                        <div class="text-left">
+                            <div class="text-xs text-gray-400 font-bold uppercase">最愛店家</div>
+                            <div class="text-lg font-bold text-gray-800 truncate w-32 md:w-48" id="stat-top-shop">無資料</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Top Item -->
+                <div class="card bg-white p-4 rounded-3xl shadow-sm border border-berry text-center col-span-2">
+                    <div class="flex items-center justify-center space-x-2">
+                        <span class="text-xl">❤️</span>
+                        <div class="text-left">
+                            <div class="text-xs text-gray-400 font-bold uppercase">最愛品項</div>
+                            <div class="text-lg font-bold text-gray-800 truncate w-32 md:w-48" id="stat-top-item">無資料</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Avg Price -->
+                <div class="col-span-2 bg-sky/30 p-2 rounded-xl text-center text-sm text-gray-600 font-medium">
+                    平均一杯單價：<span id="stat-avg-price" class="text-gray-800 font-bold">$0</span>
+                </div>
+            </div>
+
+            <!-- Input Form -->
+            <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-dashed border-tea">
+                <h2 class="text-lg font-bold text-boba mb-4 flex items-center">
+                    <span>✏️ 今天喝什麼</span>
+                </h2>
+                <form id="drink-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">日期</label>
+                        <input type="date" id="input-date" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">店家名稱</label>
+                        <input type="text" id="input-shop" placeholder="例如：五十嵐" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">飲料品項</label>
+                        <input type="text" id="input-item" placeholder="例如：1號 (四季春+珍波椰)" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
+                    </div>
+                    
+                    <!-- 新增糖度與冰塊選項 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">糖度</label>
+                            <select id="input-sugar" class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none cursor-pointer">
+                                <option value="全糖">全糖</option>
+                                <option value="少糖">少糖</option>
+                                <option value="半糖">半糖</option>
+                                <option value="微糖" selected>微糖</option>
+                                <option value="一分">一分</option>
+                                <option value="無糖">無糖</option>
+                                <option value="固定">固定</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">冰塊</label>
+                            <select id="input-ice" class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors appearance-none cursor-pointer">
+                                <option value="正常">正常</option>
+                                <option value="少冰" selected>少冰</option>
+                                <option value="微冰">微冰</option>
+                                <option value="去冰">去冰</option>
+                                <option value="常溫">常溫</option>
+                                <option value="溫">溫</option>
+                                <option value="固定">固定</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">價格</label>
+                        <input type="number" id="input-price" placeholder="50" min="0" required class="w-full bg-milk border border-tea rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-matcha transition-colors">
+                    </div>
+                    <button type="submit" class="w-full bg-boba text-white font-bold py-3 rounded-xl shadow-lg hover:bg-opacity-90 active:scale-95 transition-all flex justify-center items-center gap-2">
+                        <span>➕ 存檔 </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Column: Charts & History (Takes up 2 cols on LG) -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Charts Section -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold text-boba mb-4">📊 數據分析</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Pie Chart: Shop Distribution -->
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-sm font-bold text-gray-400 mb-2">店家喜好分佈</h3>
+                        <div class="relative w-full aspect-square max-h-48 md:max-h-64">
+                            <canvas id="shopChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Bar Chart: Spending Trend -->
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-sm font-bold text-gray-400 mb-2">花費最高品項 Top 5</h3>
+                        <div class="relative w-full h-48 md:h-64">
+                            <canvas id="itemChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History List -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-[500px] flex flex-col">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                    <h2 class="text-lg font-bold text-boba">📜 手搖飲歷史</h2>
+                    
+                    <!-- Data Actions -->
+                    <div class="flex space-x-2">
+                         <button onclick="exportData()" class="px-3 py-1 bg-tea text-boba text-xs font-bold rounded-lg hover:bg-matcha transition-colors">
+                            ⬇️ 匯出備份
+                        </button>
+                        <label class="px-3 py-1 bg-tea text-boba text-xs font-bold rounded-lg hover:bg-matcha transition-colors cursor-pointer">
+                            ⬆️ 匯入資料
+                            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="overflow-y-auto flex-1 pr-2">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white">
+                            <tr>
+                                <th class="text-xs font-bold text-gray-400 py-2 border-b border-gray-100">日期</th>
+                                <th class="text-xs font-bold text-gray-400 py-2 border-b border-gray-100">店家</th>
+                                <th class="text-xs font-bold text-gray-400 py-2 border-b border-gray-100">品項</th>
+                                <th class="text-xs font-bold text-gray-400 py-2 border-b border-gray-100 text-right">價格</th>
+                                <th class="text-xs font-bold text-gray-400 py-2 border-b border-gray-100 text-center">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-list" class="text-sm">
+                            <!-- JS will inject rows here -->
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-gray-400">目前沒有紀錄，快去買一杯吧！ 🥤</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="delete-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm p-4">
+        <div class="modal-content bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm text-center border-4 border-tea">
+            <div class="text-4xl mb-4">🗑️</div>
+            <h3 class="text-xl font-bold text-boba mb-2">確定要刪除嗎？</h3>
+            <p class="text-gray-500 mb-6 text-sm">這筆紀錄將會消失，無法復原喔！</p>
+            <div class="flex space-x-3 justify-center">
+                <button onclick="closeModal()" class="px-6 py-2 rounded-xl border-2 border-gray-200 font-bold text-gray-500 hover:bg-gray-50 transition-colors">
+                    再想想
+                </button>
+                <button onclick="confirmDelete()" class="px-6 py-2 rounded-xl bg-red-400 text-white font-bold hover:bg-red-500 shadow-lg transition-colors">
+                    刪除它
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Data Management ---
+        let drinks = JSON.parse(localStorage.getItem('bobaDrinks')) || [];
+        let pendingDeleteId = null; // 用來暫存準備刪除的 ID
+        
+        const form = document.getElementById('drink-form');
+        const historyList = document.getElementById('history-list');
+        const dateInput = document.getElementById('input-date');
+        const deleteModal = document.getElementById('delete-modal');
+
+        // Chart instances
+        let shopChartInstance = null;
+        let itemChartInstance = null;
+
+        // Set default date to today
+        dateInput.valueAsDate = new Date();
+
+        // Save to LocalStorage
+        function saveData() {
+            localStorage.setItem('bobaDrinks', JSON.stringify(drinks));
+            renderApp();
+        }
+
+        // Add Drink
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newDrink = {
+                id: Date.now(),
+                date: document.getElementById('input-date').value,
+                shop: document.getElementById('input-shop').value.trim(),
+                item: document.getElementById('input-item').value.trim(),
+                sugar: document.getElementById('input-sugar').value,
+                ice: document.getElementById('input-ice').value,
+                price: parseInt(document.getElementById('input-price').value),
+            };
+            
+            drinks.unshift(newDrink);
+            saveData();
+            
+            const currentSugar = document.getElementById('input-sugar').value; 
+            const currentIce = document.getElementById('input-ice').value;
+            
+            form.reset();
+            dateInput.valueAsDate = new Date(); 
+            // 恢復上次選擇的選項比較貼心
+            document.getElementById('input-sugar').value = currentSugar;
+            document.getElementById('input-ice').value = currentIce;
+        });
+
+        // --- Modal & Delete Logic ---
+
+        // Step 1: 點擊垃圾桶，打開視窗
+        window.openDeleteModal = function(id) {
+            pendingDeleteId = id;
+            deleteModal.classList.remove('hidden');
+        };
+
+        // Step 2: 點擊「再想想」，關閉視窗
+        window.closeModal = function() {
+            pendingDeleteId = null;
+            deleteModal.classList.add('hidden');
+        };
+
+        // Step 3: 點擊「刪除它」，執行刪除
+        window.confirmDelete = function() {
+            if (pendingDeleteId) {
+                drinks = drinks.filter(d => d.id !== pendingDeleteId);
+                saveData();
+                closeModal();
+            }
+        };
+
+        // Close modal if clicking outside
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                closeModal();
+            }
+        });
+
+        // Clear All logic
+        window.clearAllData = function() {
+            if(confirm('確定要清空所有資料嗎？此動作無法復原！')) {
+                drinks = [];
+                saveData();
+            }
+        };
+
+        // --- Export / Import Functions ---
+        
+        window.exportData = function() {
+            if (drinks.length === 0) {
+                alert("目前沒有資料可以匯出喔！");
+                return;
+            }
+            const dataStr = JSON.stringify(drinks, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `手搖飲紀錄備份_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        window.importData = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedDrinks = JSON.parse(e.target.result);
+                    if (Array.isArray(importedDrinks)) {
+                        if(confirm(`準備匯入 ${importedDrinks.length} 筆資料。\n這將會覆蓋目前的資料，確定嗎？`)) {
+                            drinks = importedDrinks;
+                            saveData();
+                            alert("資料匯入成功！🎉");
+                        }
+                    } else {
+                        alert("檔案格式錯誤，請確認這是正確的備份檔。");
+                    }
+                } catch (error) {
+                    alert("讀取檔案失敗：" + error);
+                }
+                // Reset input so same file can be selected again if needed
+                input.value = '';
+            };
+            reader.readAsText(file);
+        };
+
+        // --- Rendering Logic ---
+
+        function renderApp() {
+            renderHistory();
+            renderStats();
+            renderCharts();
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            
+            if (drinks.length === 0) {
+                historyList.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">目前沒有紀錄，快去買一杯吧！ 🥤</td></tr>`;
+                return;
+            }
+
+            drinks.forEach(drink => {
+                // 組合甜度冰塊字串
+                const details = [drink.sugar, drink.ice].filter(Boolean).join(' / ');
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-milk/50 transition-colors border-b border-gray-50";
+                row.innerHTML = `
+                    <td class="py-3 text-gray-500 whitespace-nowrap">${drink.date}</td>
+                    <td class="py-3 font-medium text-boba">${drink.shop}</td>
+                    <td class="py-3 text-gray-600">
+                        <div>${drink.item}</div>
+                        <div class="text-xs text-gray-400">${details}</div>
+                    </td>
+                    <td class="py-3 font-bold text-gray-700 text-right">$${drink.price}</td>
+                    <td class="py-3 text-center">
+                        <button onclick="openDeleteModal(${drink.id})" class="text-gray-300 hover:text-red-500 transition-colors p-1 text-lg">
+                            🗑️
+                        </button>
+                    </td>
+                `;
+                historyList.appendChild(row);
+            });
+        }
+
+        function renderStats() {
+            const totalCups = drinks.length;
+            const totalSpent = drinks.reduce((acc, curr) => acc + curr.price, 0);
+            const avgPrice = totalCups > 0 ? Math.round(totalSpent / totalCups) : 0;
+
+            // Find Top Shop
+            const shopCount = {};
+            drinks.forEach(d => { shopCount[d.shop] = (shopCount[d.shop] || 0) + 1; });
+            const topShop = Object.keys(shopCount).length > 0 
+                ? Object.keys(shopCount).reduce((a, b) => shopCount[a] > shopCount[b] ? a : b)
+                : "無資料";
+
+            // Find Top Item
+            const itemCount = {};
+            drinks.forEach(d => { itemCount[d.item] = (itemCount[d.item] || 0) + 1; });
+            const topItem = Object.keys(itemCount).length > 0 
+                ? Object.keys(itemCount).reduce((a, b) => itemCount[a] > itemCount[b] ? a : b)
+                : "無資料";
+
+            // Update DOM
+            document.getElementById('stat-total-cups').textContent = totalCups;
+            document.getElementById('stat-total-spent').textContent = '$' + totalSpent.toLocaleString();
+            document.getElementById('stat-avg-price').textContent = '$' + avgPrice;
+            document.getElementById('stat-top-shop').textContent = topShop;
+            document.getElementById('stat-top-item').textContent = topItem;
+        }
+
+        function renderCharts() {
+            if (drinks.length === 0) {
+                // If no data, maybe clear charts or show placeholder. 
+                // For now, let Chart.js handle empty data or just don't update if we destroyed them.
+                if(shopChartInstance) shopChartInstance.destroy();
+                if(itemChartInstance) itemChartInstance.destroy();
+                return;
+            }
+
+            // 1. Data for Shop Pie Chart
+            const shopCount = {};
+            drinks.forEach(d => { shopCount[d.shop] = (shopCount[d.shop] || 0) + 1; });
+            const sortedShops = Object.entries(shopCount).sort((a,b) => b[1] - a[1]);
+            const shopLabels = sortedShops.map(s => s[0]);
+            const shopData = sortedShops.map(s => s[1]);
+
+            const ctxShop = document.getElementById('shopChart').getContext('2d');
+            
+            // Destroy existing chart to prevent overlay
+            if(shopChartInstance) shopChartInstance.destroy();
+
+            shopChartInstance = new Chart(ctxShop, {
+                type: 'doughnut',
+                data: {
+                    labels: shopLabels,
+                    datasets: [{
+                        data: shopData,
+                        backgroundColor: [
+                            '#E6C9A8', '#C8D5B9', '#F4ACB7', '#D7E3FC', '#FFD6A5', '#B9FBC0'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: {family: "'Zen Maru Gothic'"} } }
+                    }
+                }
+            });
+
+            // 2. Data for Top Items (by spending) - Let's see which item drains wallet the most
+            const itemSpending = {};
+            drinks.forEach(d => { itemSpending[d.item] = (itemSpending[d.item] || 0) + d.price; });
+            // Sort by spending
+            const sortedItems = Object.entries(itemSpending).sort((a,b) => b[1] - a[1]).slice(0, 5); // Top 5
+            
+            const itemLabels = sortedItems.map(i => i[0]);
+            const itemData = sortedItems.map(i => i[1]);
+
+            const ctxItem = document.getElementById('itemChart').getContext('2d');
+            
+            if(itemChartInstance) itemChartInstance.destroy();
+
+            itemChartInstance = new Chart(ctxItem, {
+                type: 'bar',
+                data: {
+                    labels: itemLabels,
+                    datasets: [{
+                        label: '累計花費 ($)',
+                        data: itemData,
+                        backgroundColor: '#5C4033',
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Horizontal bar chart
+                    scales: {
+                        x: { beginAtZero: true, grid: { display: false } },
+                        y: { grid: { display: false }, ticks: { font: {family: "'Zen Maru Gothic'"} } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Initialize
+        renderApp();
+
+    </script>
+</body>
+</html>
 
     <script>
         /* =========================
